@@ -1,6 +1,6 @@
 [project]
 name = "naylence-agent-sdk"
-version = "0.1.5"
+version = "0.1.6"
 description = "Naylence Agent SDK"
 authors = [
     {name = "naylencedev@gmail.com"}
@@ -8,6 +8,10 @@ authors = [
 license = {text = "Apache-2.0"}
 readme = "README.md"
 requires-python = ">=3.12"
+
+dependencies = [
+    "naylence-runtime>=0.1.62"
+]
 
 keywords = ["messaging", "ai", "agents", "platform", "naylence"]
 classifiers = [
@@ -18,6 +22,19 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: System :: Distributed Computing",
+]
+
+[project.optional-dependencies]
+advanced_security = [
+    "naylence-advanced-security>=0.1.6"
+]
+
+dev = [
+    "black>=25.1.0",
+    "ruff>=0.11.12",
+    "pytest-asyncio>=1.0.0",
+    "pytest>=8.3.5",
+    "isort>=6.0.1"
 ]
 
 [project.urls]
@@ -32,28 +49,9 @@ packages = [
   { include = "naylence", from = "src"},
 ]
 
-[tool.poetry.dependencies]
-naylence-runtime = "^0.1.62"
-
-[tool.poetry.group.dev.dependencies]
-black = "^25.1.0"
-ruff = "^0.11.12"
-
-pytest-asyncio = "^1.0.0"
-pytest = "^8.3.5"
-isort = "^6.0.1"
-
 [tool.poetry.group.advanced_security.dependencies]
 naylence-advanced-security = "^0.1.6"
 
-[tool.poetry.extras]
-dev = [
-  "black",
-  "ruff",
-  "pytest-asyncio",
-  "pytest",
-  "mcp",
-]
 
 # Package sources: allow fallback to TestPyPI for packages that
 # don't exist on PyPI yet (e.g., naylence-factory while in early testing).
