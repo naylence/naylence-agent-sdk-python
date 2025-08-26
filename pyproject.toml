@@ -29,14 +29,6 @@ advanced_security = [
     "naylence-advanced-security>=0.1.6"
 ]
 
-dev = [
-    "black>=25.1.0",
-    "ruff>=0.11.12",
-    "pytest-asyncio>=1.0.0",
-    "pytest>=8.3.5",
-    "isort>=6.0.1"
-]
-
 [project.urls]
 Homepage = "https://github.com/naylence/naylence-runtime-python"
 Repository = "https://github.com/naylence/naylence-runtime-python"
@@ -55,6 +47,14 @@ naylence-advanced-security = "^0.1.6"
 
 # Package sources: allow fallback to TestPyPI for packages that
 # don't exist on PyPI yet (e.g., naylence-factory while in early testing).
+
+[tool.poetry.group.dev.dependencies]
+black = "^25.1.0"
+ruff = "^0.12.10"
+pytest = "^8.4.1"
+pytest-asyncio = "^1.1.0"
+isort = "^6.0.1"
+
 [[tool.poetry.source]]
 name = "testpypi"
 url = "https://test.pypi.org/simple"
