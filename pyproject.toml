@@ -1,6 +1,6 @@
 [project]
 name = "naylence-agent-sdk"
-version = "0.1.3"
+version = "0.1.4"
 description = "Naylence Agent SDK"
 authors = [
     {name = "naylencedev@gmail.com"}
@@ -33,11 +33,8 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-naylence-runtime = "^0.1.61"
+naylence-runtime = "^0.1.62"
 naylence-advanced-security = "^0.1.6"
-
-[tool.poetry.group.api.dependencies]
-fastapi = "^0.115.12"
 
 [tool.poetry.group.dev.dependencies]
 black = "^25.1.0"
