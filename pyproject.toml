@@ -1,6 +1,6 @@
 [project]
 name = "naylence-agent-sdk"
-version = "0.1.6"
+version = "0.1.7"
 description = "Naylence Agent SDK"
 authors = [
     {name = "naylencedev@gmail.com"}
@@ -24,26 +24,17 @@ classifiers = [
     "Topic :: System :: Distributed Computing",
 ]
 
-[project.optional-dependencies]
-advanced_security = [
-    "naylence-advanced-security>=0.1.6"
-]
-
 [project.urls]
-Homepage = "https://github.com/naylence/naylence-runtime-python"
-Repository = "https://github.com/naylence/naylence-runtime-python"
-"Bug Tracker" = "https://github.com/naylence/naylence-runtime-python/issues"
-Documentation = "https://github.com/naylence/naylence-runtime-python#readme"
+Homepage = "https://github.com/naylence/naylence-agent-sdk-python"
+Repository = "https://github.com/naylence/naylence-agent-sdk-python"
+"Bug Tracker" = "https://github.com/naylence/naylence-agent-sdk-python/issues"
+Documentation = "https://github.com/naylence/naylence-agent-sdk-python#readme"
 
 
 [tool.poetry]
 packages = [
   { include = "naylence", from = "src"},
 ]
-
-[tool.poetry.group.advanced_security.dependencies]
-naylence-advanced-security = "^0.1.6"
-
 
 # Package sources: allow fallback to TestPyPI for packages that
 # don't exist on PyPI yet (e.g., naylence-factory while in early testing).

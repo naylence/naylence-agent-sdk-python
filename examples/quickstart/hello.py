@@ -4,6 +4,9 @@ from typing import Any
 from naylence.fame.core import FameFabric
 
 from naylence.agent import Agent, BaseAgent
+from naylence.fame.util.logging import enable_logging
+
+enable_logging(log_level="warning")
 
 
 class EchoAgent(BaseAgent):
