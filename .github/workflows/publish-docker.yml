@@ -1,9 +1,7 @@
 name: Build and Push Docker Image
 
 on:
-  push:
-    branches: [ main ]
-    tags: [ 'v*' ]
+  tags: [ 'v*' ]
   release:
     types: [published]
   workflow_dispatch:
@@ -23,7 +21,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     # Only run if:
-    # 1. Manual trigger, push, or release
+    # 1. Manual trigger, tags, or release
     # 2. OR workflow_run trigger AND the PyPI workflow succeeded
     if: |
       github.event_name != 'workflow_run' || 
@@ -93,12 +91,8 @@ jobs:
         file: ./docker/Dockerfile
         platforms: linux/amd64,linux/arm64
         push: true
-        tags: |
-          ${{ steps.meta-dockerhub.outputs.tags }}
-          # ${{ steps.meta-ghcr.outputs.tags }}
-        labels: |
-          ${{ steps.meta-dockerhub.outputs.labels }}
-          # ${{ steps.meta-ghcr.outputs.labels }}
+        tags: ${{ steps.meta-dockerhub.outputs.tags }}
+        labels: ${{ steps.meta-dockerhub.outputs.labels }}
         build-args: |
           SDK_VERSION=${{ steps.get_version.outputs.version }}
         cache-from: type=gha
