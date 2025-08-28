@@ -1,6 +1,6 @@
 [project]
 name = "naylence-agent-sdk"
-version = "0.1.12"
+version = "0.1.13"
 description = "Naylence Agent SDK"
 authors = [
     {name = "naylencedev@gmail.com"}
