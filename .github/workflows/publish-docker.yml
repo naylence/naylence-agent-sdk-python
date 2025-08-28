@@ -42,6 +42,38 @@ jobs:
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "Extracted version: $VERSION"
 
+    - name: Validate version consistency
+      run: |
+        PYPROJECT_VERSION=${{ steps.get_version.outputs.version }}
+        
+        # Check if this is a git tag trigger
+        if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+          GIT_TAG_VERSION="${{ github.ref_name }}"
+          # Remove 'v' prefix if present
+          GIT_TAG_VERSION=${GIT_TAG_VERSION#v}
+          
+          echo "🏷️  Git tag version: $GIT_TAG_VERSION"
+          echo "📦 pyproject.toml version: $PYPROJECT_VERSION"
+          
+          if [[ "$GIT_TAG_VERSION" != "$PYPROJECT_VERSION" ]]; then
+            echo "❌ ERROR: Git tag version ($GIT_TAG_VERSION) doesn't match pyproject.toml version ($PYPROJECT_VERSION)"
+            echo "Please ensure the git tag matches the version in pyproject.toml"
+            exit 1
+          else
+            echo "✅ Git tag and pyproject.toml versions are in sync"
+          fi
+        else
+          echo "ℹ️  Not a git tag trigger, using pyproject.toml version: $PYPROJECT_VERSION"
+          
+          # Check if a matching tag exists
+          if git tag --list | grep -q "^v${PYPROJECT_VERSION}$"; then
+            echo "✅ Found matching git tag: v$PYPROJECT_VERSION"
+          else
+            echo "⚠️  WARNING: No matching git tag found for version $PYPROJECT_VERSION"
+            echo "Consider creating a git tag: git tag v$PYPROJECT_VERSION"
+          fi
+        fi
+
     - name: Wait for PyPI package availability
       if: github.event_name == 'workflow_run' || github.event_name == 'release'
       run: |
@@ -95,20 +127,31 @@ jobs:
     #     username: ${{ github.actor }}
     #     password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Extract metadata for Docker Hub
-      id: meta-dockerhub
-      uses: docker/metadata-action@v5
-      with:
-        images: ${{ env.DOCKERHUB_REGISTRY }}/${{ env.DOCKERHUB_IMAGE }}
-        tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-          type=semver,pattern={{major}}
-          type=raw,value=latest,enable={{is_default_branch}}
-          type=raw,value=latest,enable=${{ github.event_name == 'release' }}
-          type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+    - name: Generate Docker tags
+      id: tags
+      run: |
+        VERSION=${{ steps.get_version.outputs.version }}
+        IMAGE=${{ env.DOCKERHUB_REGISTRY }}/${{ env.DOCKERHUB_IMAGE }}
+        
+        # Always include version tag
+        TAGS="${IMAGE}:${VERSION}"
+        
+        # Add latest tag for releases, tags, or workflow_run events
+        if [[ "${{ github.event_name }}" == "release" ]] || \
+           [[ "${{ github.event_name }}" == "workflow_run" ]] || \
+           [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+          TAGS="${TAGS},${IMAGE}:latest"
+        fi
+        
+        # Add semantic version tags if version follows semver pattern (e.g., 0.1.14)
+        if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          MAJOR=$(echo $VERSION | cut -d. -f1)
+          MINOR=$(echo $VERSION | cut -d. -f1-2)
+          TAGS="${TAGS},${IMAGE}:${MAJOR},${IMAGE}:${MINOR}"
+        fi
+        
+        echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+        echo "Generated tags: ${TAGS}"
 
     # - name: Extract metadata for GHCR
     #   id: meta-ghcr
@@ -130,8 +173,14 @@ jobs:
         file: ./docker/Dockerfile
         platforms: linux/amd64,linux/arm64
         push: true
-        tags: ${{ steps.meta-dockerhub.outputs.tags }}
-        labels: ${{ steps.meta-dockerhub.outputs.labels }}
+        tags: ${{ steps.tags.outputs.tags }}
+        labels: |
+          org.opencontainers.image.title=naylence-agent-sdk
+          org.opencontainers.image.description=Naylence Agent SDK
+          org.opencontainers.image.version=${{ steps.get_version.outputs.version }}
+          org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          org.opencontainers.image.revision=${{ github.sha }}
+          org.opencontainers.image.created=${{ github.event.head_commit.timestamp }}
         build-args: |
           SDK_VERSION=${{ steps.get_version.outputs.version }}
         cache-from: type=gha
