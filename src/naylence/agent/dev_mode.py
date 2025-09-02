@@ -25,6 +25,7 @@ CLIENT_CONFIG = {
 NODE_CONFIG = {
     "node": {
         "type": "Node",
+        "id": "${env:FAME_NODE_ID:}",
         "requested_logicals": ["fame.fabric"],
         "security": {
             "type": "SecurityProfile",
@@ -44,6 +45,7 @@ NODE_CONFIG = {
 SENTINEL_CONFIG = {
     "node": {
         "type": "Sentinel",
+        "id": "${env:FAME_NODE_ID:}",
         "listeners": [
             {
                 "type": "HttpListener",
