@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
     inputs:
       adv_version:
-        description: 'naylence-advanced-security version (defaults to SDK version)'
-        required: false
+        description: 'naylence-advanced-security version (required for manual builds)'
+        required: true
         type: string
   workflow_run:
     workflows: ["Publish to PyPI"]
@@ -39,11 +39,48 @@ jobs:
       id: get_versions
       run: |
         SDK_VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
-        ADV_VERSION="${{ github.event.inputs.adv_version }}"
-        if [ -z "$ADV_VERSION" ]; then ADV_VERSION="$SDK_VERSION"; fi
         echo "sdk_version=$SDK_VERSION" >> $GITHUB_OUTPUT
-        echo "adv_version=$ADV_VERSION" >> $GITHUB_OUTPUT
         echo "Extracted SDK version: $SDK_VERSION"
+
+    - name: Determine advanced security version
+      id: get_adv_version
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          # For manual dispatch, use the provided version
+          ADV_VERSION="${{ github.event.inputs.adv_version }}"
+          echo "Using manually specified advanced security version: $ADV_VERSION"
+        else
+          # For automatic triggers, try multiple fallback options
+          ADV_VERSION=""
+          
+          # Option 1: Try repository variable
+          if [[ -n "${{ vars.ADVANCED_SECURITY_VERSION }}" ]]; then
+            ADV_VERSION="${{ vars.ADVANCED_SECURITY_VERSION }}"
+            echo "Using repository variable advanced security version: $ADV_VERSION"
+          else
+            # Option 2: Fetch latest from PyPI
+            echo "Fetching latest naylence-advanced-security version from PyPI..."
+            ADV_VERSION=$(pip index versions naylence-advanced-security 2>/dev/null | head -1 | grep -o '([^)]*' | sed 's/(//' || echo "")
+            if [ -z "$ADV_VERSION" ]; then
+              # Option 3: Fallback to TestPyPI
+              echo "Not found on PyPI, checking TestPyPI..."
+              ADV_VERSION=$(pip index versions naylence-advanced-security --index-url https://test.pypi.org/simple/ 2>/dev/null | head -1 | grep -o '([^)]*' | sed 's/(//' || echo "")
+            fi
+            if [ -n "$ADV_VERSION" ]; then
+              echo "Found latest advanced security version: $ADV_VERSION"
+            fi
+          fi
+          
+          if [ -z "$ADV_VERSION" ]; then
+            echo "❌ Could not determine naylence-advanced-security version"
+            echo "Options to fix this:"
+            echo "1. Set repository variable ADVANCED_SECURITY_VERSION"
+            echo "2. Use workflow_dispatch with manual version"
+            echo "3. Ensure naylence-advanced-security is published to PyPI/TestPyPI"
+            exit 1
+          fi
+        fi
+        echo "adv_version=$ADV_VERSION" >> $GITHUB_OUTPUT
         echo "Advanced Security version: $ADV_VERSION"
 
     - name: Validate version consistency
@@ -70,7 +107,7 @@ jobs:
       if: github.event_name == 'workflow_run' || github.event_name == 'release'
       run: |
         SDK_VERSION=${{ steps.get_versions.outputs.sdk_version }}
-        ADV_VERSION=${{ steps.get_versions.outputs.adv_version }}
+        ADV_VERSION=${{ steps.get_adv_version.outputs.adv_version }}
         TIMEOUT=180; SLEEP=10; ELAPSED=0
         echo "Waiting for naylence-agent-sdk==$SDK_VERSION and naylence-advanced-security==$ADV_VERSION..."
         while [ $ELAPSED -lt $TIMEOUT ]; do
@@ -139,7 +176,7 @@ jobs:
           org.opencontainers.image.created=${{ github.event.head_commit.timestamp }}
         build-args: |
           SDK_VERSION=${{ steps.get_versions.outputs.sdk_version }}
-          ADVANCED_SECURITY_VERSION=${{ steps.get_versions.outputs.adv_version }}
+          ADVANCED_SECURITY_VERSION=${{ steps.get_adv_version.outputs.adv_version }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 

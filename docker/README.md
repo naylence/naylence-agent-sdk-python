@@ -81,3 +81,18 @@ Both workflows are triggered by:
 - GitHub releases
 - Successful PyPI package publication
 - Manual workflow dispatch
+
+### Advanced Security Version Management
+
+The advanced security image uses independent versioning from the SDK. The workflow determines the version using:
+
+1. **Manual Dispatch**: Version must be specified in the `adv_version` input
+2. **Automatic Builds**: Uses fallback priority:
+   - Repository variable `ADVANCED_SECURITY_VERSION` (if set)
+   - Latest version from PyPI
+   - Latest version from TestPyPI
+
+To set the repository variable in GitHub:
+```
+Settings → Actions → Variables → Repository variables → ADVANCED_SECURITY_VERSION
+```
