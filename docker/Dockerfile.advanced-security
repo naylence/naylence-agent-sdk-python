@@ -1,0 +1,43 @@
+FROM python:3.12-slim
+
+# Environment hygiene
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Create non-root user first
+RUN useradd -m -u 1000 agent
+
+# Set up virtual environment
+ENV VIRTUAL_ENV=/home/agent/venv
+RUN python -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# Change ownership of venv to agent user
+RUN chown -R agent:agent $VIRTUAL_ENV
+
+WORKDIR /app
+
+# Switch to non-root user before pip install
+USER agent
+
+# Install package in virtual environment
+ARG SDK_VERSION
+ARG ADVANCED_SECURITY_VERSION
+RUN pip install --no-cache-dir \
+  --index-url https://test.pypi.org/simple \
+  --extra-index-url https://pypi.org/simple \
+  naylence-agent-sdk${SDK_VERSION:+==${SDK_VERSION}} \
+  naylence-advanced-security${ADVANCED_SECURITY_VERSION:+==${ADVANCED_SECURITY_VERSION}}
+
+# Add license notice for the bundled components
+RUN mkdir -p /home/agent/licenses && \
+    echo "This image bundles multiple components with different licenses:" > /home/agent/licenses/NOTICE && \
+    echo "- naylence-agent-sdk: Apache-2.0 License" >> /home/agent/licenses/NOTICE && \
+    echo "- naylence-advanced-security: Business Source License (BSL-1.1)" >> /home/agent/licenses/NOTICE && \
+    echo "" >> /home/agent/licenses/NOTICE && \
+    echo "By using this image, you agree to comply with all applicable license terms." >> /home/agent/licenses/NOTICE && \
+    echo "See project repositories for full license texts:" >> /home/agent/licenses/NOTICE && \
+    echo "- https://github.com/naylence/naylence-agent-sdk-python/blob/main/LICENSE" >> /home/agent/licenses/NOTICE && \
+    echo "- https://github.com/naylence/naylence-advanced-security" >> /home/agent/licenses/NOTICE
+
+CMD ["python", "--version"]

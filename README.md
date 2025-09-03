@@ -12,7 +12,7 @@ It provides the core runtime, APIs, and developer tools to create **secure, dura
 * 🧩 **Extensible by design** – plug in your own Authorizers, Security Managers, Connectors, etc.
 * 🔒 **Zero-trust security** – built-in support for overlay encryption, envelope signing, and SPIFFE-style identities.
 * 🌐 **Federated messaging** – agents can communicate across sentinels, domains, and organizations.
-* 🐳 **Container-ready** – official `agent-sdk-base` Docker image for rapid prototyping and deployment.
+* 🐳 **Container-ready** – official Docker images (`naylence/agent-sdk-python` for OSS, `naylence/agent-sdk-adv-python` for advanced security) for rapid prototyping and deployment.
 * 📦 **Typed and structured** – Python 3.12+, [Pydantic](https://docs.pydantic.dev/) models for safe envelopes and configs.
 
 ---

@@ -1,0 +1,152 @@
+name: Build and Push Advanced Security Docker Image
+
+on:
+  push:
+    tags: [ 'v*' ]
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      adv_version:
+        description: 'naylence-advanced-security version (defaults to SDK version)'
+        required: false
+        type: string
+  workflow_run:
+    workflows: ["Publish to PyPI"]
+    types:
+      - completed
+    branches: [ main ]
+
+env:
+  DOCKERHUB_REGISTRY: docker.io
+  DOCKERHUB_IMAGE: naylence/agent-sdk-adv-python
+
+jobs:
+  build-and-push-adv:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name != 'workflow_run' || 
+      github.event.workflow_run.conclusion == 'success'
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Extract SDK version from pyproject.toml
+      id: get_versions
+      run: |
+        SDK_VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+        ADV_VERSION="${{ github.event.inputs.adv_version }}"
+        if [ -z "$ADV_VERSION" ]; then ADV_VERSION="$SDK_VERSION"; fi
+        echo "sdk_version=$SDK_VERSION" >> $GITHUB_OUTPUT
+        echo "adv_version=$ADV_VERSION" >> $GITHUB_OUTPUT
+        echo "Extracted SDK version: $SDK_VERSION"
+        echo "Advanced Security version: $ADV_VERSION"
+
+    - name: Validate version consistency
+      run: |
+        PYPROJECT_VERSION=${{ steps.get_versions.outputs.sdk_version }}
+        if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+          GIT_TAG_VERSION=${{ github.ref_name }}
+          GIT_TAG_VERSION=${GIT_TAG_VERSION#v}
+          echo "🏷️  Git tag version: $GIT_TAG_VERSION"
+          echo "📦 pyproject.toml version: $PYPROJECT_VERSION"
+          [ "$GIT_TAG_VERSION" = "$PYPROJECT_VERSION" ] || {
+            echo "❌ Git tag and pyproject.toml version mismatch"; exit 1; }
+          echo "✅ Git tag and pyproject.toml versions are in sync"
+        else
+          echo "ℹ️  Not a git tag trigger, using pyproject.toml version: $PYPROJECT_VERSION"
+          if git tag --list | grep -q "^v${PYPROJECT_VERSION}$"; then
+            echo "✅ Found matching git tag: v$PYPROJECT_VERSION"
+          else
+            echo "⚠️  WARNING: No matching git tag found for version $PYPROJECT_VERSION"
+          fi
+        fi
+
+    - name: Wait for packages on (Test)PyPI
+      if: github.event_name == 'workflow_run' || github.event_name == 'release'
+      run: |
+        SDK_VERSION=${{ steps.get_versions.outputs.sdk_version }}
+        ADV_VERSION=${{ steps.get_versions.outputs.adv_version }}
+        TIMEOUT=180; SLEEP=10; ELAPSED=0
+        echo "Waiting for naylence-agent-sdk==$SDK_VERSION and naylence-advanced-security==$ADV_VERSION..."
+        while [ $ELAPSED -lt $TIMEOUT ]; do
+          SDK_OK=$(pip index versions naylence-agent-sdk 2>/dev/null | grep -q "$SDK_VERSION" && echo 1 || echo 0)
+          ADV_OK=$(pip index versions naylence-advanced-security 2>/dev/null | grep -q "$ADV_VERSION" && echo 1 || echo 0)
+          if [ $SDK_OK -eq 1 ] && [ $ADV_OK -eq 1 ]; then
+            echo "✅ Packages found on PyPI"; break
+          fi
+          # Check TestPyPI fallback
+          SDK_OK_T=$(pip index versions naylence-agent-sdk --index-url https://test.pypi.org/simple/ 2>/dev/null | grep -q "$SDK_VERSION" && echo 1 || echo 0)
+          ADV_OK_T=$(pip index versions naylence-advanced-security --index-url https://test.pypi.org/simple/ 2>/dev/null | grep -q "$ADV_VERSION" && echo 1 || echo 0)
+          if [ $SDK_OK_T -eq 1 ] && [ $ADV_OK_T -eq 1 ]; then
+            echo "✅ Packages found on TestPyPI"; break
+          fi
+          echo "⏳ Not yet available, waiting ${SLEEP}s..."
+          sleep $SLEEP; ELAPSED=$((ELAPSED + SLEEP))
+        done
+        if [ $ELAPSED -ge $TIMEOUT ]; then
+          echo "⚠️  Timeout waiting for packages; proceeding (build may fail if unavailable)"
+        fi
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.DOCKERHUB_REGISTRY }}
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Generate Docker tags
+      id: tags
+      run: |
+        VERSION=${{ steps.get_versions.outputs.sdk_version }}
+        IMAGE=${{ env.DOCKERHUB_REGISTRY }}/${{ env.DOCKERHUB_IMAGE }}
+        TAGS="${IMAGE}:${VERSION}"
+        if [[ "${{ github.event_name }}" == "release" ]] || \
+           [[ "${{ github.event_name }}" == "workflow_run" ]] || \
+           [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+          TAGS="${TAGS},${IMAGE}:latest"
+        fi
+        if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          MAJOR=$(echo $VERSION | cut -d. -f1)
+          MINOR=$(echo $VERSION | cut -d. -f1-2)
+          TAGS="${TAGS},${IMAGE}:${MAJOR},${IMAGE}:${MINOR}"
+        fi
+        echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+        echo "Generated tags: ${TAGS}"
+
+    - name: Build and push Docker image (Advanced)
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./docker/Dockerfile.advanced-security
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: ${{ steps.tags.outputs.tags }}
+        labels: |
+          org.opencontainers.image.title=naylence-agent-sdk-adv-python
+          org.opencontainers.image.description=Naylence Agent SDK (advanced security build). Includes naylence-advanced-security.
+          org.opencontainers.image.version=${{ steps.get_versions.outputs.sdk_version }}
+          org.opencontainers.image.licenses=Apache-2.0 AND BSL-1.1
+          org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          org.opencontainers.image.revision=${{ github.sha }}
+          org.opencontainers.image.created=${{ github.event.head_commit.timestamp }}
+        build-args: |
+          SDK_VERSION=${{ steps.get_versions.outputs.sdk_version }}
+          ADVANCED_SECURITY_VERSION=${{ steps.get_versions.outputs.adv_version }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Update Docker Hub description (Advanced)
+      uses: peter-evans/dockerhub-description@v4
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        repository: ${{ env.DOCKERHUB_IMAGE }}
+        readme-filepath: ./docker/README.advanced-security.md

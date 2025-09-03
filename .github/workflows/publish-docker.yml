@@ -178,6 +178,7 @@ jobs:
           org.opencontainers.image.title=naylence-agent-sdk
           org.opencontainers.image.description=Naylence Agent SDK
           org.opencontainers.image.version=${{ steps.get_version.outputs.version }}
+          org.opencontainers.image.licenses=Apache-2.0
           org.opencontainers.image.source=https://github.com/${{ github.repository }}
           org.opencontainers.image.revision=${{ github.sha }}
           org.opencontainers.image.created=${{ github.event.head_commit.timestamp }}

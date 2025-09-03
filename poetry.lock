@@ -827,14 +827,14 @@ reference = "testpypi"
 
 [[package]]
 name = "naylence-runtime"
-version = "0.1.76"
+version = "0.1.82"
 description = "Naylence Runtime"
 optional = false
 python-versions = ">=3.12"
 groups = ["main"]
 files = [
-    {file = "naylence_runtime-0.1.76-py3-none-any.whl", hash = "sha256:ce46063a0e878c6be62f36c49a864666b0bc9cfd366aa68a2bccebafd04c4d75"},
-    {file = "naylence_runtime-0.1.76.tar.gz", hash = "sha256:202413dd2856484115ad7cfda52570285c7b804e39aa0dea4c16c0cb0d529cf3"},
+    {file = "naylence_runtime-0.1.82-py3-none-any.whl", hash = "sha256:310a6bd397987929c31138e8d361b31f128295180215d1e58f04ec2bde3584f1"},
+    {file = "naylence_runtime-0.1.82.tar.gz", hash = "sha256:6a27539706dc815ce8ccf279f05a1b974b7222cce6aa45792b16f2e95190c592"},
 ]
 
 [package.dependencies]
@@ -1635,4 +1635,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12"
-content-hash = "b4f4eb9d82e5cbab7d5ef4e10ad96fc54819516da9ba8c666924851c792c78cb"
+content-hash = "d302590ce3d9679388e31138a36119c370ab741fac9b3fe8668d95daddf16850"
