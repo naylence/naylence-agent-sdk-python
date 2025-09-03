@@ -1,131 +1,131 @@
-# Naylence Agent SDK
+# Naylence Agent SDK (Python)
 
-The **Naylence Agent SDK** is the official developer toolkit for building and running agents on top of the [Naylence Agentic Fabric](https://github.com/naylence).
+The **Naylence Agent SDK** is the official toolkit for building agents and clients on the Naylence Agentic Fabric. It gives you a clean, typed, async-first API for composing tasks, streaming results, and wiring agents together—locally or across a distributed fabric.
 
-It provides the core runtime, APIs, and developer tools to create **secure, durable, zero-trust agents** that can interoperate across domains.
-
----
-
-## Features
-
-* ⚡ **Simple developer experience** – clean APIs and idioms for agent construction.
-* 🧩 **Extensible by design** – plug in your own Authorizers, Security Managers, Connectors, etc.
-* 🔒 **Zero-trust security** – built-in support for overlay encryption, envelope signing, and SPIFFE-style identities.
-* 🌐 **Federated messaging** – agents can communicate across sentinels, domains, and organizations.
-* 🐳 **Container-ready** – official Docker images (`naylence/agent-sdk-python` for OSS, `naylence/agent-sdk-adv-python` for advanced security) for rapid prototyping and deployment.
-* 📦 **Typed and structured** – Python 3.12+, [Pydantic](https://docs.pydantic.dev/) models for safe envelopes and configs.
+> If you're new to Naylence, start here. For lower‑level transport/fabric internals, see **naylence‑runtime**.
 
 ---
 
-## Installation
+## Highlights
 
-Install directly from PyPI:
+* **Ergonomic agent model** — subclass `BaseAgent` (one-shot) or `BackgroundTaskAgent` (long‑running/streaming) and focus on your logic.
+* **Typed messages & tasks** — Pydantic models for `Task`, `Message`, `Artifact`, and JSON‑RPC A2A operations.
+* **Async all the way** — non‑blocking lifecycle with easy scatter‑gather helpers (`Agent.broadcast`, `Agent.run_many`).
+* **Remote proxies** — call agents by **address** or **capabilities** via `Agent.remote_*` helpers.
+* **Streaming & cancellation** — subscribe to live status/artifacts; cancel in‑flight work.
+* **FastAPI integration** — drop‐in JSON‑RPC router (`create_agent_router`) and `/agent.json` metadata endpoint.
+* **Security ready** — works with runtime security profiles; **strict‑overlay** requires the `naylence‑advanced‑security` add‑on.
+
+---
+
+## Install
 
 ```bash
 pip install naylence-agent-sdk
 ```
 
-or with Poetry:
-
-```bash
-poetry add naylence-agent-sdk
-```
+> Python **3.12+** is required.
 
 ---
 
-## Quickstart
+## Quickstart (minimal)
 
 ```python
 import asyncio
 from typing import Any
-
 from naylence.fame.core import FameFabric
-
 from naylence.agent import Agent, BaseAgent
-
 
 class EchoAgent(BaseAgent):
     async def run_task(self, payload: Any, id: Any) -> Any:
         return payload
 
-
 async def main():
-    # --- Start a FameFabric session and serve the agent ---
     async with FameFabric.create() as fabric:
-        # Register the SimpleAgent with the fabric and get its address.
-        # In real deployments, this would happen in the agent runtime process.
-        agent_address = await fabric.serve(EchoAgent())
+        address = await fabric.serve(EchoAgent())
+        echo = Agent.remote_by_address(address)
+        print(await echo.run_task("Hello, world!", None))
 
-        # Resolve a remote proxy to the agent.
-        # This simulates a client or external caller invoking the agent.
-        remote_agent = Agent.remote_by_address(agent_address)
-
-        # Send a new task to the remote agent.
-        result = await remote_agent.run_task(payload="Hello, World!")
-        print(result)
-
-
-# Entry point for running this script directly.
-if __name__ == "__main__":
-    asyncio.run(main())
+asyncio.run(main())
 ```
 
-Run with:
-
-```bash
-python echo_agent.py
-```
+For a gentle, runnable tour—from single‑process to distributed orchestration—use the **Examples** repo: [https://github.com/naylence/naylence-examples-python](https://github.com/naylence/naylence-examples-python).
 
 ---
 
-## Examples
+## Core concepts
 
-* A **minimal quickstart** is included in this repo under [`examples/quickstart`](./examples/quickstart).
-* A full gallery of **docker-compose examples** lives in the [naylence-examples repo](https://github.com/naylence/naylence-examples).
+**Agents & tasks**
 
-These examples demonstrate:
+* Implement `run_task(payload, id)` for simple one‑shot work, or override `start_task(...)`/`get_task_status(...)` for background jobs.
+* `Message.parts` carries either text (`TextPart`) or structured data (`DataPart`).
+* Long‑running flows stream `TaskStatusUpdateEvent` and `TaskArtifactUpdateEvent` until terminal (`COMPLETED`/`FAILED`/`CANCELED`).
 
-* Multi-agent orchestration
-* Overlay security and sealed channels
-* Federation across sentinels
+**Remote proxies**
 
----
+* `Agent.remote_by_address("echo@fame.fabric")` to call a known address.
+* `Agent.remote_by_capabilities(["agent"])` to call by capability (fabric does resolution).
 
-## Development
+**Streaming & cancel**
 
-Clone and set up Poetry:
+* `subscribe_to_task_updates(...)` yields status/artifacts live.
+* `cancel_task(...)` requests cooperative cancellation when supported by the agent.
 
-```bash
-git clone https://github.com/naylence/naylence-agent-sdk-python.git
-cd naylence-agent-sdk
-poetry install
-```
+**RPC operations**
 
-Run tests:
+* A2A JSON‑RPC methods (`tasks/send`, `.../get`, `.../cancel`, etc.) are provided for task lifecycle.
+* Custom functions can be exposed via the RPC mixin in the underlying fabric (e.g., streaming operations).
 
-```bash
-poetry run pytest
-```
+**FastAPI router**
 
-Build the wheel:
-
-```bash
-poetry build
-```
+* Use `create_agent_router(agent)` to expose a JSON‑RPC endpoint (default: `/fame/v1/jsonrpc`) and `GET /agent.json` to return an `AgentCard`.
 
 ---
 
-## License
+## Choosing an agent base class
 
-Licensed under the [Apache 2.0 License](./LICENSE).
-For advanced security extensions, see [Naylence Advanced Security](https://github.com/naylence/naylence-advanced-security).
+* **`BaseAgent`** — great for synchronous/short tasks; the default fallback packages your return value into a `Task(COMPLETED)`.
+* **`BackgroundTaskAgent`** — best for long‑running/streaming work. You implement `run_background_task(...)`; the base manages queues, TTLs, and end‑of‑stream.
+
+Both base classes include sensible defaults (poll‑based streaming, simple auth pass‑through). You can override any part of the lifecycle.
+
+---
+
+## Development workflow
+
+* Add your agents in a project with the SDK.
+* Use `FameFabric.create()` in tests or local scripts to host agents in‑process.
+* For distributed setups, operate a sentinel/fabric with **naylence‑runtime** (or your infra) and connect agents remotely.
+* Use the **Examples** repo ([https://github.com/naylence/naylence-examples-python](https://github.com/naylence/naylence-examples-python)) to learn patterns like scatter‑gather, RPC streaming, cancellation, and security tiers.
+
+---
+
+## Security notes
+
+The SDK runs on the Naylence fabric’s security profiles:
+
+* **direct / gated / overlay** modes work out‑of‑the‑box with the open‑source stack.
+* **strict‑overlay** (sealed overlay encryption + SPIFFE/X.509 identities) is available **only** with the **`naylence‑advanced‑security`** package.
+
+See repo links below for the advanced add‑on and images that bundle it.
 
 ---
 
 ## Links
 
-* [Naylence core](https://github.com/naylence/naylence-core-python)
-* [Naylence runtime](https://github.com/naylence/naylence-runtime-python)
-* [Examples repo](https://github.com/naylence/naylence-examples-python)
+* **Agent SDK (this repo):** [https://github.com/naylence/naylence-agent-sdk-python](https://github.com/naylence/naylence-agent-sdk-python)
+* **Examples (Python):** [https://github.com/naylence/naylence-examples-python](https://github.com/naylence/naylence-examples-python)
+* **Runtime (fabric & transports):** [https://github.com/naylence/naylence-runtime-python](https://github.com/naylence/naylence-runtime-python)
+* **Advanced Security add‑on:** [https://github.com/naylence/naylence-advanced-security-python](https://github.com/naylence/naylence-advanced-security-python)
+
+Docker images:
+
+* OSS: `naylence/agent-sdk-python`
+* Advanced: `naylence/agent-sdk-adv-python` (includes `naylence-advanced-security`; BSL-licensed add-on)
 
 ---
+
+## License & support
+
+* **License:** Apache‑2.0 (SDK).&#x20;
+* **Issues:** please use the appropriate GitHub repo (SDK, Runtime, Examples, Advanced Security).
