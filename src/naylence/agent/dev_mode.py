@@ -26,6 +26,7 @@ NODE_CONFIG = {
     "node": {
         "type": "Node",
         "id": "${env:FAME_NODE_ID:}",
+        "public_url": "${env:FAME_PUBLIC_URL:}",
         "requested_logicals": ["fame.fabric"],
         "security": {
             "type": "SecurityProfile",
@@ -46,6 +47,7 @@ SENTINEL_CONFIG = {
     "node": {
         "type": "Sentinel",
         "id": "${env:FAME_NODE_ID:}",
+        "public_url": "${env:FAME_PUBLIC_URL:}",
         "listeners": [
             {
                 "type": "HttpListener",
