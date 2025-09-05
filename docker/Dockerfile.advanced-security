@@ -24,8 +24,8 @@ USER agent
 ARG SDK_VERSION
 ARG ADVANCED_SECURITY_VERSION
 RUN pip install --no-cache-dir \
-  --index-url https://test.pypi.org/simple \
-  --extra-index-url https://pypi.org/simple \
+  --index-url https://pypi.org/simple \
+  --extra-index-url https://test.pypi.org/simple \
   naylence-agent-sdk${SDK_VERSION:+==${SDK_VERSION}} \
   naylence-advanced-security${ADVANCED_SECURITY_VERSION:+==${ADVANCED_SECURITY_VERSION}}
 

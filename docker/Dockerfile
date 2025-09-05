@@ -23,8 +23,8 @@ USER agent
 # Install package in virtual environment
 ARG SDK_VERSION
 RUN pip install --no-cache-dir \
-  --index-url https://test.pypi.org/simple \
-  --extra-index-url https://pypi.org/simple \
+  --index-url https://pypi.org/simple \
+  --extra-index-url https://test.pypi.org/simple \
   naylence-agent-sdk${SDK_VERSION:+==${SDK_VERSION}}
 
 CMD ["python", "--version"]
