@@ -17,7 +17,7 @@ CLIENT_CONFIG = {
         },
         "storage": {
             "type": "StorageProfile",
-            "profile": "${env:STORAGE_PROFILE:memory}",
+            "profile": "${env:FAME_STORAGE_PROFILE:memory}",
         },
     }
 }
@@ -38,7 +38,7 @@ NODE_CONFIG = {
         },
         "storage": {
             "type": "StorageProfile",
-            "profile": "${env:STORAGE_PROFILE:memory}",
+            "profile": "${env:FAME_STORAGE_PROFILE:memory}",
         },
     }
 }
@@ -69,7 +69,7 @@ SENTINEL_CONFIG = {
         },
         "storage": {
             "type": "StorageProfile",
-            "profile": "${env:STORAGE_PROFILE:memory}",
+            "profile": "${env:FAME_STORAGE_PROFILE:memory}",
         },
     },
 }

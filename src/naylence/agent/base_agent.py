@@ -37,6 +37,9 @@ from naylence.agent.errors import (
 )
 from naylence.agent.rpc_adapter import handle_agent_rpc_request
 from naylence.agent.util import decode_fame_data_payload, make_task
+from naylence.fame.storage.storage_provider import (
+    StorageProvider,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +57,7 @@ class BaseAgent(Agent):
         self._address = None
         self._capabilities = [AGENT_CAPABILITY]
         self._subscriptions: dict[str, asyncio.Task] = {}  # id → Task
+        self._storage_provider: Optional[StorageProvider] = None
 
     @property
     def capabilities(self):
@@ -74,6 +78,16 @@ class BaseAgent(Agent):
     @address.setter
     def address(self, address: FameAddress):
         self._address = address
+
+    @property
+    def storage_provider(self) -> Optional[StorageProvider]:
+        if not self._storage_provider:
+            from naylence.fame.node.node import get_node
+
+            node = get_node()
+            self._storage_provider = node.storage_provider
+
+        return self._storage_provider
 
     @staticmethod
     def _is_rpc_request(raw_message: Any):
