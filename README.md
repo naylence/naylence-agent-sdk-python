@@ -1,3 +1,5 @@
+[![Join our Discord](https://img.shields.io/badge/Discord-Join%20Chat-blue?logo=discord)](https://discord.gg/nwZAeqdv7y)
+
 # Naylence Agent SDK (Python)
 
 The **Naylence Agent SDK** is the official toolkit for building agents and clients on the Naylence Agentic Fabric. It gives you a clean, typed, async-first API for composing tasks, streaming results, and wiring agents together—locally or across a distributed fabric.
