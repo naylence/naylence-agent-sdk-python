@@ -21,7 +21,7 @@ CLIENT_CONFIG = {
         },
         "delivery": {
             "type": "DeliveryProfile",
-            "profile": "${env:FAME_DELIVERY_PROFILE:at-least-once}",
+            "profile": "${env:FAME_DELIVERY_PROFILE:at-most-once}",
         },
     }
 }
@@ -46,7 +46,7 @@ NODE_CONFIG = {
         },
         "delivery": {
             "type": "DeliveryProfile",
-            "profile": "${env:FAME_DELIVERY_PROFILE:at-least-once}",
+            "profile": "${env:FAME_DELIVERY_PROFILE:at-most-once}",
         },
     }
 }
@@ -81,7 +81,7 @@ SENTINEL_CONFIG = {
         },
         "delivery": {
             "type": "DeliveryProfile",
-            "profile": "${env:FAME_DELIVERY_PROFILE:at-least-once}",
+            "profile": "${env:FAME_DELIVERY_PROFILE:at-most-once}",
         },
     },
 }
