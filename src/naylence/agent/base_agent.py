@@ -133,7 +133,7 @@ class BaseAgent(Agent, Generic[StateT]):
         state_key: str = "state",
         state_factory=None,
     ):
-        self._name = name  # or generate_id(mode="fingerprint")
+        self._name = name  or generate_id(mode="fingerprint")
         self._address = None
         self._capabilities = [AGENT_CAPABILITY]
         self._subscriptions: dict[str, asyncio.Task] = {}  # id → Task
