@@ -1,6 +1,19 @@
 import asyncio
-from typing import Any, AsyncIterator, Dict, Optional
+import re
+from typing import (
+    Any,
+    AsyncIterator,
+    Dict,
+    Generic,
+    Optional,
+    TypeVar,
+    get_args,
+    get_origin,
+    AsyncContextManager,
+)
+from types import TracebackType
 
+from pydantic import BaseModel, PrivateAttr
 from naylence.fame.core import (
     AGENT_CAPABILITY,
     DataFrame,
@@ -51,20 +64,118 @@ TERMINAL_TASK_STATES = {
 }
 
 
-class BaseAgent(Agent):
-    def __init__(self, name: str | None = None):
-        self._name = name or generate_id()
+class BaseAgentState(BaseModel):
+    # Internal fields for context manager functionality
+    _agent: Optional["BaseAgent"] = PrivateAttr(default=None)
+    _lock_acquired: bool = PrivateAttr(default=False)
+    _loaded_state: Optional["BaseAgentState"] = PrivateAttr(default=None)
+
+    model_config = {"extra": "forbid"}
+
+    def _set_agent(self, agent: "BaseAgent") -> None:
+        """Internal method to set the agent reference."""
+        self._agent = agent
+
+    async def __aenter__(self):
+        """Load fresh state and acquire lock."""
+        if self._agent is None:
+            raise RuntimeError("State is not associated with an agent")
+
+        # Acquire the agent's state lock
+        await self._agent._state_lock.acquire()
+        self._lock_acquired = True
+
+        try:
+            # Load fresh state from storage
+            loaded_state = await self._agent._load_state()
+            # Keep reference to the loaded state for saving later
+            self._loaded_state = loaded_state
+            return loaded_state
+        except Exception:
+            self._agent._state_lock.release()
+            self._lock_acquired = False
+            raise
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
+        """Save state and release lock."""
+        try:
+            if (
+                exc_type is None
+                and self._agent is not None
+                and self._loaded_state is not None
+            ):
+                # Save the loaded state instance that was modified
+                await self._agent._save_state(self._loaded_state)
+        finally:
+            if self._lock_acquired and self._agent is not None:
+                self._agent._state_lock.release()
+                self._lock_acquired = False
+
+
+StateT = TypeVar("StateT", bound=BaseAgentState)
+
+
+class BaseAgent(Agent, Generic[StateT]):
+    # Optional class-level way to declare the state model for the agent
+    STATE_MODEL: type[BaseModel] | None = None
+
+    def __init__(
+        self,
+        name: str | None = None,
+        *,
+        state_model: type[BaseModel] | None = None,
+        state_namespace: str | None = None,
+        state_key: str = "state",
+        state_factory=None,
+    ):
+        self._name = name  # or generate_id(mode="fingerprint")
         self._address = None
         self._capabilities = [AGENT_CAPABILITY]
         self._subscriptions: dict[str, asyncio.Task] = {}  # id → Task
         self._storage_provider: Optional[StorageProvider] = None
+
+        # --- Simple persisted state (optional) -------------------------
+        # Extract state type from Generic parameter if available
+        self._state_model: type[BaseModel] | None = (
+            state_model
+            or getattr(self, "STATE_MODEL", None)
+            or self._extract_state_type_from_generic()
+        )
+        self._state_namespace_raw: Optional[str] = state_namespace
+        self._state_key: str = state_key
+        self._state_factory = state_factory  # Callable that creates default state
+        self._state_store = None  # lazy; kv-store handle
+        self._state_cache: Optional[StateT] = None
+        self._state_lock = asyncio.Lock()  # Protect state operations
+        # ----------------------------------------------------------------
+
+    def _extract_state_type_from_generic(self) -> type[BaseModel] | None:
+        """Extract the StateT type from Generic[StateT] if specified."""
+        # Look through the class hierarchy for Generic base
+        for base in getattr(self.__class__, "__orig_bases__", []):
+            origin = get_origin(base)
+            if origin is not None and issubclass(origin, BaseAgent):
+                args = get_args(base)
+                if args and len(args) > 0:
+                    state_type = args[0]
+                    # Ensure it's a BaseModel subclass
+                    if isinstance(state_type, type) and issubclass(
+                        state_type, BaseModel
+                    ):
+                        return state_type
+        return None
 
     @property
     def capabilities(self):
         return self._capabilities
 
     @property
-    def name(self) -> str:
+    def name(self) -> Optional[str]:
         return self._name
 
     @property
@@ -88,6 +199,103 @@ class BaseAgent(Agent):
             self._storage_provider = node.storage_provider
 
         return self._storage_provider
+
+    # ---------------------- Persisted state helpers ----------------------
+    def _sanitize_namespace(self, ns: str) -> str:
+        """
+        Produce a filesystem/SQLite-friendly name.
+        Allows [A-Za-z0-9._-], replaces others with '_', trims/limits length.
+        """
+        safe = re.sub(r"[^A-Za-z0-9._-]+", "_", ns)
+        safe = safe.strip("._-")
+        if not safe:
+            safe = "ns"
+        # keep it reasonably short for filenames
+        return safe[:120]
+
+    def _default_state_namespace(self) -> str:
+        if not self._name:
+            raise RuntimeError(
+                "Cannot derive default state namespace without agent name. "
+                "Set 'name' or provide 'state_namespace'."
+            )
+        return f"__agent_{self.name}"
+
+    async def _ensure_state_store(self, model_type: type[BaseModel]) -> None:
+        if self._state_store is None:
+            assert self.storage_provider is not None, (
+                "Storage provider is not available"
+            )
+            namespace = self._state_namespace_raw or self._default_state_namespace()
+            self._state_store = await self.storage_provider.get_kv_store(
+                model_type, namespace=namespace
+            )
+
+    async def _load_state(self) -> StateT:
+        """Load state from storage, initialize if not found."""
+        if self._state_cache is not None:
+            return self._state_cache
+
+        if self._state_model is None:
+            raise RuntimeError(
+                "No state model configured. Provide via Generic[StateT], STATE_MODEL, "
+                "constructor 'state_model=', or 'state_factory='."
+            )
+
+        await self._ensure_state_store(self._state_model)
+        state = await self._state_store.get(self._state_key)  # type: ignore[attr-defined]
+
+        if state is None:
+            # Initialize new state
+            if self._state_factory is not None:
+                state = self._state_factory()
+            else:
+                state = self._state_model()
+            await self._state_store.set(self._state_key, state)  # type: ignore[attr-defined]
+
+        self._state_cache = state  # type: ignore[assignment]
+        # Set agent reference for context manager functionality
+        if hasattr(state, "_set_agent"):
+            state._set_agent(self)  # type: ignore[attr-defined]
+        return state  # type: ignore[return-value]
+
+    async def _save_state(self, state: StateT) -> None:
+        """Save state to storage."""
+        model_type = type(state)
+        await self._ensure_state_store(model_type)
+        await self._state_store.set(self._state_key, state)  # type: ignore[attr-defined]
+        self._state_cache = state
+
+    @property
+    def state(self) -> AsyncContextManager[StateT]:
+        """
+        Returns an async context manager for the state object.
+        Usage:
+            async with agent.state as s:
+                s.count += 1
+                # Auto-saves on context exit
+        """
+        if self._state_model is None:
+            raise RuntimeError("No state model configured")
+
+        # Create a state instance for context manager use
+        state_instance = self._state_model()
+        state_instance._set_agent(self)  # type: ignore[attr-defined]
+        return state_instance  # type: ignore[return-value]
+
+    async def get_state(self) -> StateT:
+        """Get current state (for direct access without auto-save)."""
+        async with self._state_lock:
+            return await self._load_state()
+
+    async def clear_state(self) -> None:
+        """Clear the persisted state."""
+        async with self._state_lock:
+            if self._state_store is not None:
+                await self._state_store.set(self._state_key, None)  # type: ignore[attr-defined]
+            self._state_cache = None
+
+    # ------------------- End persisted state helpers ---------------------
 
     @staticmethod
     def _is_rpc_request(raw_message: Any):
@@ -139,7 +347,7 @@ class BaseAgent(Agent):
         Examples include push notifications, alerts, or custom application signals. The
         default implementation just logs the payload.
         """
-        logger.info("Unhandled inbound message: %s", message)
+        logger.warning("unhandled_inbound_message", message=message)
         return None  # No response by default
 
     async def _handle_rpc_message(
@@ -305,3 +513,14 @@ class BaseAgent(Agent):
             f"{cls.__name__} must implement at least one of: "
             "`start_task()`, `start_task_simple()`, or `run_task()`."
         )
+
+    def aserve(
+        self,
+        address: FameAddress | str,
+        *,
+        log_level: str | int | None = None,
+        **kwargs,
+    ):
+        if not self._name:
+            self._name = generate_id(mode="fingerprint", material=address)
+        return super().aserve(address, log_level=log_level, **kwargs)

@@ -19,6 +19,10 @@ CLIENT_CONFIG = {
             "type": "StorageProfile",
             "profile": "${env:FAME_STORAGE_PROFILE:memory}",
         },
+        "delivery": {
+            "type": "DeliveryProfile",
+            "profile": "${env:FAME_DELIVERY_PROFILE:at-least-once}",
+        },
     }
 }
 
@@ -39,6 +43,10 @@ NODE_CONFIG = {
         "storage": {
             "type": "StorageProfile",
             "profile": "${env:FAME_STORAGE_PROFILE:memory}",
+        },
+        "delivery": {
+            "type": "DeliveryProfile",
+            "profile": "${env:FAME_DELIVERY_PROFILE:at-least-once}",
         },
     }
 }
@@ -70,6 +78,10 @@ SENTINEL_CONFIG = {
         "storage": {
             "type": "StorageProfile",
             "profile": "${env:FAME_STORAGE_PROFILE:memory}",
+        },
+        "delivery": {
+            "type": "DeliveryProfile",
+            "profile": "${env:FAME_DELIVERY_PROFILE:at-least-once}",
         },
     },
 }

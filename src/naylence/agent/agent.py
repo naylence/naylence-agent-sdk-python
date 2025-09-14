@@ -58,7 +58,7 @@ class Agent(RpcMixin, FameService, ABC):
     # -- Metadata --------------------------------------------------------- #
     @property
     @abstractmethod
-    def name(self) -> str: ...
+    def name(self) -> Optional[str]: ...
 
     @property
     @abstractmethod

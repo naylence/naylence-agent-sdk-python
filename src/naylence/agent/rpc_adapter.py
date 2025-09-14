@@ -210,6 +210,6 @@ async def handle_custom_rpc_request(
             result = await handler(*args, **kwargs)
             yield JSONRPCResponse(id=custom_req.id, result=result)
     except Exception as e:
-        yield JSONRPCResponse(id=custom_req.id, error=InvalidRequestError(data=str(e)))
+        yield JSONRPCResponse(id=custom_req.id, error=InternalError(message=str(e)))
 
     return
