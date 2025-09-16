@@ -1,4 +1,4 @@
-from . import dev_mode
+from . import configs
 from .a2a_types import *  # noqa: F403
 from .agent import Agent
 from .agent_api_router import create_agent_router
@@ -19,5 +19,5 @@ __all__ = [
     "make_task_params",
     "first_text_part",
     "first_data_part",
-    "dev_mode",
+    "configs",
 ]

@@ -27,7 +27,7 @@ from naylence.fame.core import (
     generate_id,
 )
 from naylence.fame.util import logging
-
+from naylence.fame.util.util import camel_to_snake_case
 from naylence.agent.a2a_types import (
     AgentCard,
     AuthenticationInfo,
@@ -133,7 +133,7 @@ class BaseAgent(Agent, Generic[StateT]):
         state_key: str = "state",
         state_factory=None,
     ):
-        self._name = name  or generate_id(mode="fingerprint")
+        self._name = name or camel_to_snake_case(self.__class__.__name__)
         self._address = None
         self._capabilities = [AGENT_CAPABILITY]
         self._subscriptions: dict[str, asyncio.Task] = {}  # id → Task

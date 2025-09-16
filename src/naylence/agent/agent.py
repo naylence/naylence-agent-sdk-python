@@ -180,6 +180,9 @@ class Agent(RpcMixin, FameService, ABC):
         from .base_agent import BaseAgent
 
         class AgentImpl(BaseAgent):
+            def __init__(self):
+                super().__init__(name=generate_id())
+
             async def run_task(
                 self, payload: dict[str, Any] | str | None, id: str | None
             ) -> Any:

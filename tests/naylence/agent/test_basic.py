@@ -18,8 +18,8 @@ from naylence.agent.util import make_task
 @pytest.mark.asyncio
 async def test_background_task_lifecycle():
     class TestAgent(BaseAgent):
-        def __init__(self):
-            super().__init__("test_agent")
+        def __init__(self, name: str | None = None):
+            super().__init__(name=name)
             self._tasks: dict[str, TaskState] = {}
 
         async def start_task(self, params: TaskSendParams) -> Task:
