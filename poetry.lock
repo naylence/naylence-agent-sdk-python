@@ -928,14 +928,14 @@ pydantic = ">=2.11.4,<3.0.0"
 
 [[package]]
 name = "naylence-runtime"
-version = "0.3.15"
+version = "0.3.16"
 description = "Naylence Runtime"
 optional = false
 python-versions = ">=3.12"
 groups = ["main"]
 files = [
-    {file = "naylence_runtime-0.3.15-py3-none-any.whl", hash = "sha256:1f9e484699c29b0fb2b1086d71b7cf644cc56e27ba38e459facdb9a849b3e6de"},
-    {file = "naylence_runtime-0.3.15.tar.gz", hash = "sha256:8e7f7694df1f1ba13b1346b66eb88d9d9bdca184769a1ec61bc15b282ed72f58"},
+    {file = "naylence_runtime-0.3.16-py3-none-any.whl", hash = "sha256:c338144c9d39b9f926ad7c96197d630d398e983da49903f103ef597e0893709c"},
+    {file = "naylence_runtime-0.3.16.tar.gz", hash = "sha256:dcce3824b03a8bf3bfe32317ce8a393cd0efa96a4218247926363c02e9f54412"},
 ]
 
 [package.dependencies]
@@ -1552,14 +1552,14 @@ full = ["httpx (>=0.27.0,<0.29.0)", "itsdangerous", "jinja2", "python-multipart 
 
 [[package]]
 name = "structlog"
-version = "25.4.0"
+version = "25.5.0"
 description = "Structured Logging for Python"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "structlog-25.4.0-py3-none-any.whl", hash = "sha256:fe809ff5c27e557d14e613f45ca441aabda051d119ee5a0102aaba6ce40eed2c"},
-    {file = "structlog-25.4.0.tar.gz", hash = "sha256:186cd1b0a8ae762e29417095664adf1d6a31702160a46dacb7796ea82f7409e4"},
+    {file = "structlog-25.5.0-py3-none-any.whl", hash = "sha256:a8453e9b9e636ec59bd9e79bbd4a72f025981b3ba0f5837aebf48f02f37a7f9f"},
+    {file = "structlog-25.5.0.tar.gz", hash = "sha256:098522a3bebed9153d4570c6d0288abf80a031dfdb2048d59a49e9dc2190fc98"},
 ]
 
 [[package]]
@@ -1836,4 +1836,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12"
-content-hash = "66a3a9ac18b9939b4d97ed12d70c26a7cd6793ea32014e51aa57b760c35be040"
+content-hash = "707d298e400964740adbb2463ed3317d21f541ca75725b1afeed67ea384d6e2b"
