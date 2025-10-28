@@ -376,7 +376,12 @@ class BaseAgent(Agent, Generic[StateT]):
                     logger.warning("Missing reply_to in request")
                     break
 
-                frame = DataFrame(payload=rpc_response)
+                if hasattr(rpc_response, "model_dump"):
+                    payload = rpc_response.model_dump(by_alias=True, exclude_none=True)  # type: ignore[attr-defined]
+                else:
+                    payload = rpc_response
+
+                frame = DataFrame(payload=payload)
                 envelope = create_fame_envelope(
                     frame=frame,
                     to=reply_to_addr,
@@ -399,7 +404,12 @@ class BaseAgent(Agent, Generic[StateT]):
                     logger.warning("Missing reply_to in sendSubscribe stream")
                     return
 
-                frame = DataFrame(payload=rpc_response)
+                if hasattr(rpc_response, "model_dump"):
+                    payload = rpc_response.model_dump(by_alias=True, exclude_none=True)  # type: ignore[attr-defined]
+                else:
+                    payload = rpc_response
+
+                frame = DataFrame(payload=payload)
                 env = create_fame_envelope(
                     frame=frame, to=target, corr_id=rpc_request.get("id")
                 )
