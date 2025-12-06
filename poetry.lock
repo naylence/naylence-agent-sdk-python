@@ -184,23 +184,22 @@ files = [
 
 [[package]]
 name = "anyio"
-version = "4.11.0"
+version = "4.12.0"
 description = "High-level concurrency and networking framework on top of asyncio or Trio"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "anyio-4.11.0-py3-none-any.whl", hash = "sha256:0287e96f4d26d4149305414d4e3bc32f0dcd0862365a4bddea19d7a1ec38c4fc"},
-    {file = "anyio-4.11.0.tar.gz", hash = "sha256:82a8d0b81e318cc5ce71a5f1f8b5c4e63619620b63141ef8c995fa0db95a57c4"},
+    {file = "anyio-4.12.0-py3-none-any.whl", hash = "sha256:dad2376a628f98eeca4881fc56cd06affd18f659b17a747d3ff0307ced94b1bb"},
+    {file = "anyio-4.12.0.tar.gz", hash = "sha256:73c693b567b0c55130c104d0b43a9baf3aa6a31fc6110116509f27bf75e21ec0"},
 ]
 
 [package.dependencies]
 idna = ">=2.8"
-sniffio = ">=1.1"
 typing_extensions = {version = ">=4.5", markers = "python_version < \"3.13\""}
 
 [package.extras]
-trio = ["trio (>=0.31.0)"]
+trio = ["trio (>=0.31.0) ; python_version < \"3.10\"", "trio (>=0.32.0) ; python_version >= \"3.10\""]
 
 [[package]]
 name = "attrs"
@@ -896,14 +895,14 @@ files = [
 
 [[package]]
 name = "naylence-core"
-version = "0.3.1"
+version = "0.3.2"
 description = "Naylence Core"
 optional = false
 python-versions = ">=3.12"
 groups = ["main"]
 files = [
-    {file = "naylence_core-0.3.1-py3-none-any.whl", hash = "sha256:a4fb23044bd22aa67e4b3b7d7633a076d593f70d8c99b9328b9b2b9554073b16"},
-    {file = "naylence_core-0.3.1.tar.gz", hash = "sha256:4ac9ed0c221590dc4348cd0dcd6cb57a4c895a5081d148c9e3ad3527930a65a8"},
+    {file = "naylence_core-0.3.2-py3-none-any.whl", hash = "sha256:acfa61019498e4ee698824b61af9dec3f78da4213236877dd2a5c7a8636c4f89"},
+    {file = "naylence_core-0.3.2.tar.gz", hash = "sha256:773a9d2acbd76fe0ef5f5db886819a1d0b1b6a4dcee54e892a266b6411a25795"},
 ]
 
 [package.dependencies]
@@ -927,14 +926,14 @@ pydantic = ">=2.11.4,<3.0.0"
 
 [[package]]
 name = "naylence-runtime"
-version = "0.3.17"
+version = "0.3.18"
 description = "Naylence Runtime"
 optional = false
 python-versions = ">=3.12"
 groups = ["main"]
 files = [
-    {file = "naylence_runtime-0.3.17-py3-none-any.whl", hash = "sha256:7559c65a52849b5601bd7535fd756f715bdc5268f30d4ed42820ee71bcdeb517"},
-    {file = "naylence_runtime-0.3.17.tar.gz", hash = "sha256:3b5c08e86b233b24788880b76bf0ff4145b3819408ff54cf606a1bdbff002187"},
+    {file = "naylence_runtime-0.3.18-py3-none-any.whl", hash = "sha256:4cdf79bdbd5b2aab91882cb8b265d14daf41e264076dcd93dc5917d113212342"},
+    {file = "naylence_runtime-0.3.18.tar.gz", hash = "sha256:de9b8709843683e87d8db86deab998ea0732c0c63060cec9c51cf6dbc0cd97c5"},
 ]
 
 [package.dependencies]
@@ -942,7 +941,7 @@ aiohttp = ">=3.11.18,<4.0.0"
 cryptography = ">=45.0.6,<46.0.0"
 fastapi = ">=0.116.1,<0.117.0"
 httpx = ">=0.28.1,<0.29.0"
-naylence-core = ">=0.3.0,<0.4.0"
+naylence-core = ">=0.3.2,<0.4.0"
 pyjwt = ">=2.10.1,<3.0.0"
 python-multipart = ">=0.0.20,<0.0.21"
 pyyaml = ">=6.0.2,<7.0.0"
@@ -976,14 +975,14 @@ files = [
 
 [[package]]
 name = "platformdirs"
-version = "4.5.0"
+version = "4.5.1"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "platformdirs-4.5.0-py3-none-any.whl", hash = "sha256:e578a81bb873cbb89a41fcc904c7ef523cc18284b7e3b3ccf06aca1403b7ebd3"},
-    {file = "platformdirs-4.5.0.tar.gz", hash = "sha256:70ddccdd7c99fc5942e9fc25636a8b34d04c24b335100223152c2803e4063312"},
+    {file = "platformdirs-4.5.1-py3-none-any.whl", hash = "sha256:d03afa3963c806a9bed9d5125c8f4cb2fdaf74a55ab60e5d59b3fde758104d31"},
+    {file = "platformdirs-4.5.1.tar.gz", hash = "sha256:61d5cdcc6065745cdd94f0f878977f8de9437be93de97c1c12f853c9c0cdcbda"},
 ]
 
 [package.extras]
@@ -1154,14 +1153,14 @@ files = [
 
 [[package]]
 name = "pydantic"
-version = "2.12.4"
+version = "2.12.5"
 description = "Data validation using Python type hints"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "pydantic-2.12.4-py3-none-any.whl", hash = "sha256:92d3d202a745d46f9be6df459ac5a064fdaa3c1c4cd8adcfa332ccf3c05f871e"},
-    {file = "pydantic-2.12.4.tar.gz", hash = "sha256:0f8cb9555000a4b5b617f66bfd2566264c4984b27589d3b845685983e8ea85ac"},
+    {file = "pydantic-2.12.5-py3-none-any.whl", hash = "sha256:e561593fccf61e8a20fc46dfc2dfe075b8be7d0188df33f221ad1f0139180f9d"},
+    {file = "pydantic-2.12.5.tar.gz", hash = "sha256:4d351024c75c0f085a9febbb665ce8c0c6ec5d30e903bdb6394b7ede26aebb49"},
 ]
 
 [package.dependencies]
@@ -1523,18 +1522,6 @@ files = [
 ]
 
 [[package]]
-name = "sniffio"
-version = "1.3.1"
-description = "Sniff out which async library your code is running under"
-optional = false
-python-versions = ">=3.7"
-groups = ["main"]
-files = [
-    {file = "sniffio-1.3.1-py3-none-any.whl", hash = "sha256:2f6da418d1f1e0fddd844478f41680e794e6051915791a034ff65e5f100525a2"},
-    {file = "sniffio-1.3.1.tar.gz", hash = "sha256:f4324edc670a0f49750a81b895f35c3adb843cca46f0530f79fc1babb23789dc"},
-]
-
-[[package]]
 name = "starlette"
 version = "0.48.0"
 description = "The little ASGI library that shines."
@@ -1839,4 +1826,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12"
-content-hash = "26cb4826672f056af204d3a30a2ccd74040326d2a89459a8e97a8152fc03babe"
+content-hash = "0fbd7cbb9c500cfdffc64f79a1fe42913cdff448e79b04ba725ce62b893252db"
