@@ -11,6 +11,10 @@ CLIENT_CONFIG = {
             "type": "AdmissionProfile",
             "profile": "${env:FAME_ADMISSION_PROFILE:open}",
         },
+        "identity_policy": {
+            "type": "NodeIdentityPolicyProfile",
+            "profile": "${env:FAME_NODE_IDENTITY_PROFILE:default}",
+        },
         "storage": {
             "type": "StorageProfile",
             "profile": "${env:FAME_STORAGE_PROFILE:memory}",
@@ -35,6 +39,10 @@ NODE_CONFIG = {
         "admission": {
             "type": "AdmissionProfile",
             "profile": "${env:FAME_ADMISSION_PROFILE:open}",
+        },
+        "identity_policy": {
+            "type": "NodeIdentityPolicyProfile",
+            "profile": "${env:FAME_NODE_IDENTITY_PROFILE:default}",
         },
         "storage": {
             "type": "StorageProfile",
@@ -70,6 +78,10 @@ SENTINEL_CONFIG = {
         "admission": {
             "type": "AdmissionProfile",
             "profile": "${env:FAME_ADMISSION_PROFILE:none}",
+        },
+        "identity_policy": {
+            "type": "NodeIdentityPolicyProfile",
+            "profile": "${env:FAME_NODE_IDENTITY_PROFILE:default}",
         },
         "storage": {
             "type": "StorageProfile",
