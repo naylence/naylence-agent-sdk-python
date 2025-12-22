@@ -102,6 +102,22 @@ Both base classes include sensible defaults (poll‑based streaming, simple auth
 
 ---
 
+## API Documentation
+
+To generate API documentation from source:
+
+```bash
+# Generate Markdown docs to docs/api/
+poetry run docs-gen
+
+# Or specify a custom output directory
+poetry run docs-gen --out path/to/output
+```
+
+The generated docs are Markdown files compatible with Nextra and other documentation systems.
+
+---
+
 ## Security notes
 
 The SDK runs on the Naylence fabric’s security profiles:

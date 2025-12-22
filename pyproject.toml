@@ -1,6 +1,6 @@
 [project]
 name = "naylence-agent-sdk"
-version = "0.3.25"
+version = "0.3.26"
 description = "Naylence Agent SDK"
 authors = [
     {name = "naylencedev@gmail.com"}
@@ -65,3 +65,6 @@ pythonpath = "."
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[project.entry-points."naylence.TransportListenerFactory"]
+AgentHttpGatewayListener = "naylence.agent.gateway.agent_http_gateway_listener_factory:AgentHttpGatewayListenerFactory"
