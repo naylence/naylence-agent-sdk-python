@@ -930,14 +930,14 @@ pydantic = ">=2.11.4,<3.0.0"
 
 [[package]]
 name = "naylence-factory"
-version = "0.1.3"
+version = "0.1.4"
 description = "Naylence resource factory and extension management framework"
 optional = false
 python-versions = ">=3.12"
 groups = ["main"]
 files = [
-    {file = "naylence_factory-0.1.3-py3-none-any.whl", hash = "sha256:69da5208c75a0905e2258eca30f25a4f5d72b63badb1f9d9a886e46d7a11c5ba"},
-    {file = "naylence_factory-0.1.3.tar.gz", hash = "sha256:02e2c3e1811f520544ea0539d8edef318c1a88c6000ce35f53db5d551ced4e38"},
+    {file = "naylence_factory-0.1.4-py3-none-any.whl", hash = "sha256:5026c2af90da6b73b869f837df6a6d7b016a6fd0f918625ff475e8683be9d19d"},
+    {file = "naylence_factory-0.1.4.tar.gz", hash = "sha256:295c7c7f0411c58fbc7b9a8aba92b1d8ef694830ffec05291afb17454bbeb27c"},
 ]
 
 [package.dependencies]

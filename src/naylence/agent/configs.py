@@ -1,3 +1,6 @@
+from naylence.fame.factory import Expressions
+
+
 SENTINEL_PORT = 8000
 
 
@@ -63,17 +66,20 @@ SENTINEL_CONFIG = {
         "listeners": [
             {
                 "type": "HttpListener",
-                "port": SENTINEL_PORT,
+                "port": Expressions.env('FAME_LISTENER_HTTP_PORT', \
+                    Expressions.env('FAME_LISTENER_PORT', SENTINEL_PORT)),
                 "enabled": "${env:FAME_LISTENER_HTTP_ENABLED:true}",
             },
             {
                 "type": "WebSocketListener",
-                "port": SENTINEL_PORT,
+                "port": Expressions.env('FAME_LISTENER_WEBSOCKET_PORT', \
+                    Expressions.env('FAME_LISTENER_PORT', SENTINEL_PORT)),
                 "enabled": "${env:FAME_LISTENER_WEBSOCKET_ENABLED:true}",
             },
             {
                 "type": "AgentHttpGatewayListener",
-                "port": SENTINEL_PORT,
+                "port": Expressions.env('FAME_LISTENER_AGENT_HTTP_GATEWAY_PORT', \
+                    Expressions.env('FAME_LISTENER_PORT', SENTINEL_PORT)),
                 "enabled": "${env:FAME_LISTENER_AGENT_HTTP_GATEWAY_ENABLED:false}",
             },
         ],
