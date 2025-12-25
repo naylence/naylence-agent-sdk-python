@@ -1,0 +1,51 @@
+# Python Agent SDK API Reference
+
+This section contains the auto-generated API documentation for the **naylence-agent-sdk** Python package.
+
+## Classes
+
+| Class | Description |
+| ----- | ----------- |
+| [Agent](classes/Agent/) | Abstract base class for all agents. |
+| [AgentException](classes/AgentException/) | Base class for all agent-level errors. |
+| [AgentProxy](classes/AgentProxy/) | Remote proxy for invoking agent methods over the network. |
+| [Artifact](classes/Artifact/) | - |
+| [AuthorizationException](classes/AuthorizationException/) | Raised when authentication or authorization fails. |
+| [BackgroundTaskAgent](classes/BackgroundTaskAgent/) | Base for agents that run long-running background tasks. |
+| [BaseAgent](classes/BaseAgent/) | Standard implementation of the :class:`Agent` protocol. |
+| [BaseAgentState](classes/BaseAgentState/) | Base class for agent state with Pydantic validation. |
+| [ConflictException](classes/ConflictException/) | Raised when data already exists and cannot be recreated. |
+| [DataPart](classes/DataPart/) | - |
+| [DuplicateTaskException](classes/DuplicateTaskException/) | Raised when a task with the same ID has already been registered. |
+| [FilePart](classes/FilePart/) | - |
+| [InvalidDataException](classes/InvalidDataException/) | Raised when provided data is semantically or structurally invalid. |
+| [InvalidTaskException](classes/InvalidTaskException/) | Raised when the task payload is malformed or incomplete. |
+| [Message](classes/Message/) | - |
+| [NoDataFoundException](classes/NoDataFoundException/) | Raised when requested data is not found. |
+| [PushNotificationNotSupportedException](classes/PushNotificationNotSupportedException/) | - |
+| [RateLimitExceededException](classes/RateLimitExceededException/) | Raised when the agent rate-limits a request. |
+| [Task](classes/Task/) | - |
+| [TaskArtifactUpdateEvent](classes/TaskArtifactUpdateEvent/) | - |
+| [TaskNotCancelableException](classes/TaskNotCancelableException/) | - |
+| [TaskState](classes/TaskState/) | - |
+| [TaskStatus](classes/TaskStatus/) | - |
+| [TaskStatusUpdateEvent](classes/TaskStatusUpdateEvent/) | - |
+| [TextPart](classes/TextPart/) | - |
+| [UnsupportedOperationException](classes/UnsupportedOperationException/) | Raised when the agent does not support the requested operation. |
+
+## Functions
+
+| Function | Description |
+| -------- | ----------- |
+| [first_data_part](functions/first_data_part/) | - |
+| [first_text_part](functions/first_text_part/) | Safely extract the .text field from the first Part in a list, if it's a TextPart. |
+| [make_task](functions/make_task/) | - |
+
+## Other
+
+| Name | Description |
+| ---- | ----------- |
+| [CLIENT_CONFIG](other/CLIENT_CONFIG/) | - |
+| [NODE_CONFIG](other/NODE_CONFIG/) | - |
+| [Part](other/Part/) | - |
+| [SENTINEL_CONFIG](other/SENTINEL_CONFIG/) | - |

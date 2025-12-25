@@ -1,0 +1,32 @@
+# BaseAgentState
+
+Base class for agent state with Pydantic validation.
+
+Provides async context manager support for safe state access with automatic
+persistence. Subclass this to define your agent's state schema.
+
+Example:
+
+```python
+from pydantic import BaseModel
+
+class CounterState(BaseAgentState):
+    count: int = 0
+
+class CounterAgent(BaseAgent[CounterState]):
+    STATE_MODEL = CounterState
+
+    async def run_task(self, payload, id):
+        async with self.state as s:
+            s.count += 1
+            return s.count
+```
+
+
+**Extends:** BaseModel
+
+## Attributes
+
+| Attribute | Type | Description |
+| --------- | ---- | ----------- |
+| `model_config` | `Any` | - |

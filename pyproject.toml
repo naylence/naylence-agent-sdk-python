@@ -1,6 +1,6 @@
 [project]
 name = "naylence-agent-sdk"
-version = "0.3.27"
+version = "0.3.28"
 description = "Naylence Agent SDK"
 authors = [
     {name = "naylencedev@gmail.com"}
@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 
 dependencies = [
-    "naylence-runtime>=0.3.27,<0.4.0",
+    "naylence-runtime>=0.3.28,<0.4.0",
 ]
 
 keywords = ["messaging", "ai", "agents", "platform", "naylence"]

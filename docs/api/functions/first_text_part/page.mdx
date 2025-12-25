@@ -1,0 +1,33 @@
+# first_text_part
+
+```python
+def first_text_part(message: Optional[Message]) -> Optional[str]
+```
+
+Safely extract the .text field from the first Part in a list, if it's a TextPart.
+
+Parameters:
+  • parts: a sequence of Part (e.g. [TextPart, DataPart, …]).
+
+Returns:
+  • The `text` string if the first part is a TextPart.
+  • None if the list is empty or the first part is not a TextPart.
+
+Example:
+
+```python
+msg_parts = [TextPart(type="text", text="Hello", metadata=None)]
+first_text_part(msg_parts)
+```
+
+    "Hello"
+
+
+```python
+no_parts: List[Part] = []
+first_text_part(no_parts)  # returns None
+
+mixed_parts = [DataPart(type="data", data={"x": 1}, metadata=None)]
+first_text_part(mixed_parts)  # returns None
+```
+
