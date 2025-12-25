@@ -38,6 +38,9 @@ jobs:
       - name: Run tests
         run: poetry run pytest
 
+      - name: Clean dist directory
+        run: rm -rf dist
+
       - name: Build dists
         run: poetry build
 
