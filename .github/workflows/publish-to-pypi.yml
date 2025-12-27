@@ -1,6 +1,9 @@
 name: Publish to PyPI
 
 on:
+  push:
+    tags:
+      - 'v*'
   release:
     types: [published]
   workflow_dispatch:
@@ -74,8 +77,8 @@ jobs:
           packages-dir: dist
 
   publish-pypi:
-    # Run on release, or on dispatch with target == pypi
-    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.target == 'pypi')
+    # Run on release, tag push, or on dispatch with target == pypi
+    if: github.event_name == 'push' || github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.target == 'pypi')
     needs: build
     runs-on: ubuntu-latest
     environment: pypi            # Environment for PyPI OIDC
