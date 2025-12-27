@@ -1,10 +1,6 @@
 name: Build and Push Advanced Security Docker Image
 
 on:
-  push:
-    tags: [ 'v*' ]
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       adv_version:
@@ -15,7 +11,6 @@ on:
     workflows: ["Publish to PyPI"]
     types:
       - completed
-    branches: [ main ]
 
 env:
   DOCKERHUB_REGISTRY: docker.io
