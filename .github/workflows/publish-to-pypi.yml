@@ -83,8 +83,11 @@ jobs:
           packages-dir: dist
 
   publish-pypi:
-    # Run on release, tag push, or on dispatch with target == pypi
-    if: github.event_name == 'push' || github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.target == 'pypi')
+    # Run on release, workflow_run from tag, or on dispatch with target == pypi
+    if: |
+      github.event_name == 'release' ||
+      (github.event_name == 'workflow_run' && startsWith(github.event.workflow_run.head_branch, 'v')) ||
+      (github.event_name == 'workflow_dispatch' && inputs.target == 'pypi')
     needs: build
     runs-on: ubuntu-latest
     environment: pypi            # Environment for PyPI OIDC
