@@ -20,8 +20,13 @@ permissions:
   id-token: write   # required for OIDC uploads
 
 jobs:
+  # Verify tests pass before building
+  test:
+    uses: ./.github/workflows/test.yml
+
   # Build once and upload where needed
   build:
+    needs: test
     runs-on: ubuntu-latest
     outputs:
       dist-path: ${{ steps.set-dist.outputs.path }}
